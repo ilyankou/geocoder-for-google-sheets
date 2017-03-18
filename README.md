@@ -1,1 +1,1 @@
-# geocoder-for-google-sheets
+# google sheets geocoder
