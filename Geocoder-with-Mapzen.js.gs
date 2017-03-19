@@ -18,7 +18,7 @@ function geocode(source) {
   if (cells.getNumColumns() != 6) {
     ui.alert(
       'Warning',
-      'You must select 6 columns: Address, Latitude, Longitude, Found Address, Geocode Quality, Geocode Source',
+      'You must select 6 columns: Address, Latitude, Longitude, Found Address, Match Quality, Source',
       ui.ButtonSet.OK
     );
     return;
@@ -39,9 +39,11 @@ function geocode(source) {
       nFailure += withUSCensus(cells, addressRow, address);
     } else if (source == 'Google') {
       nFailure += withGoogle(cells, addressRow, address);
-    } else if (source == 'Mapzen') {
-      code = withMapzen(cells, addressRow, address);
-      if (code == 2) {
+    } else if (source == 'Mapzen OA') {
+      nFailure += withMapzenOA(cells, addressRow, address);
+    } else if (source == 'Mapzen OSM') {
+      code = withMapzenOSM(cells, addressRow, address);
+      if (code == 3) {
         printComplete = false;
         break;
       }
@@ -57,7 +59,7 @@ function geocode(source) {
 }
 
 /**
- * Geocode address using Google Maps API
+ * Geocode address with Google Apps https://developers.google.com/apps-script/reference/maps/geocoder
  */
 function withGoogle(cells, row, address) {
   location = googleGeocoder.geocode(address);
@@ -97,7 +99,7 @@ function withGoogle(cells, row, address) {
 }
 
 /**
- * Geocoding with US Census
+ * Geocoding with US Census Geocoder https://geocoding.geo.census.gov/geocoder/
  */
 function withUSCensus(cells, row, address) {
   var url = 'https://geocoding.geo.census.gov/'
@@ -141,25 +143,18 @@ function withUSCensus(cells, row, address) {
 }
 
 /**
- * Geocoding with Mapzen
+ * Geocoding with Mapzen Search, Open Address (OA) https://mapzen.com/documentation/search/search/
  */
-function withMapzen(cells, row, address) {
+function withMapzenOA(cells, row, address) {
    var url = 'https://search.mapzen.com/v1/search?'
           + 'api_key=' + mapzenKey
           + '&text=' + encodeURIComponent(address)
-          /**
-           * Possible sources are:
-           * -OpenAddresses: oa
-           * -OpenStreetMap: osm
-           * -Who's On First: wof
-           * -GeoNames: gn
-           */
           + '&sources=oa'
           + '&size=1';
 
   var response = JSON.parse(UrlFetchApp.fetch(url, {muteHttpExceptions: true}));
 
-  // If repsonse is an HTTP exception, print it and exit with code 2 so that
+  // If response is an HTTP exception, print it and exit with code 2 so that
   // geocoding won't continue
   if (response.results) {
     if (response.results.error) {
@@ -174,7 +169,7 @@ function withMapzen(cells, row, address) {
       [latColumn, ''],
       [lngColumn, ''],
       [qualityColumn, 'No Match'],
-      [sourceColumn, 'Mapzen']
+      [sourceColumn, 'Mapzen OA']
     ]);
     return 1;
   }
@@ -189,7 +184,55 @@ function withMapzen(cells, row, address) {
     [latColumn, lat],
     [lngColumn, lng],
     [qualityColumn, confidence],
-    [sourceColumn, 'Mapzen']
+    [sourceColumn, 'Mapzen OA']
+  ]);
+
+  return 0;
+}
+
+/**
+ * Geocoding with Mapzen Search, Open Street Map (OSM) https://mapzen.com/documentation/search/search/
+ */
+function withMapzenOSM(cells, row, address) {
+   var url = 'https://search.mapzen.com/v1/search?'
+          + 'api_key=' + mapzenKey
+          + '&text=' + encodeURIComponent(address)
+          + '&sources=osm'
+          + '&size=1';
+
+  var response = JSON.parse(UrlFetchApp.fetch(url, {muteHttpExceptions: true}));
+
+  // If response is an HTTP exception, print it and exit with code 2 so that
+  // geocoding won't continue
+  if (response.results) {
+    if (response.results.error) {
+      ui.alert('Error', response.results.error.message, ui.ButtonSet.OK);
+      return 2;
+    }
+  }
+
+  if (response.features.length == 0) {
+    insertDataIntoSheet(cells, row, [
+      [foundAddressColumn, ''],
+      [latColumn, ''],
+      [lngColumn, ''],
+      [qualityColumn, 'No Match'],
+      [sourceColumn, 'Mapzen OSM']
+    ]);
+    return 1;
+  }
+
+  var lat = response.features[0].geometry.coordinates[0];
+  var lng = response.features[0].geometry.coordinates[1];
+  var confidence = response.features[0].properties.confidence;
+  var address = response.features[0].properties.label;
+
+  insertDataIntoSheet(cells, row, [
+    [foundAddressColumn, address],
+    [latColumn, lat],
+    [lngColumn, lng],
+    [qualityColumn, confidence],
+    [sourceColumn, 'Mapzen OSM']
   ]);
 
   return 0;
@@ -212,25 +255,34 @@ function googleAddressToPosition() {
   geocode('Google');
 }
 
-function mapzenAddressToPosition() {
+function mapzenAddressOAToPosition() {
   mapzenKey = ui.prompt('Insert Mapzen Key:').getResponseText();
-  geocode('Mapzen');
+  geocode('Mapzen OA');
+}
+
+function mapzenAddressOSMToPosition() {
+  mapzenKey = ui.prompt('Insert Mapzen Key:').getResponseText();
+  geocode('Mapzen OSM');
 }
 
 
 function generateMenu() {
   var entries = [
     {
-      name: 'with US Census (Public Address Current)',
+      name: "with US Census (limit 1000 per batch)",
       functionName: 'censusAddressToPosition'
     },
     {
-      name: "with Google Maps",
+      name: "with Google (limit 1000 per day)" ,
       functionName: "googleAddressToPosition"
     },
     {
-      name: "with Mapzen (OpenAddresses)",
-      functionName: "mapzenAddressToPosition"
+      name: "with Mapzen OpenAddress (requires API key)",
+      functionName: "mapzenAddressOAToPosition"
+    },
+    {
+      name: "with Mapzen OpenStreetMap (requires API key)",
+      functionName: "mapzenAddressOSMToPosition"
     },
   ];
 
