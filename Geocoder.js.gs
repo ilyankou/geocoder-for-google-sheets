@@ -17,7 +17,7 @@ function geocode(source) {
   if (cells.getNumColumns() != 6) {
     ui.alert(
       'Warning',
-      'You must select 6 columns: Address, Latitude, Longitude, Found Address, Match Quality, Source',
+      'You must select 6 columns: Location, Latitude, Longitude, Found, Quality, Source',
       ui.ButtonSet.OK
     );
     return;
