@@ -57,10 +57,13 @@ function withUSCensus(cells, row, address) {
   var url = 'https://geocoding.geo.census.gov/'
           + 'geocoder/geographies/onelineaddress?address='
           + encodeURIComponent(address)
+          + '&vintage=Current_Current'
           + '&benchmark=Public_AR_Current&format=json';
 
   var response = JSON.parse(UrlFetchApp.fetch(url));
-  ui.alert(response.result);
+
+  Logger.log(response);
+
   var matches = (response.result.addressMatches.length > 0) ? 'Match' : 'No Match';
 
   if (matches !== 'Match') {
@@ -94,10 +97,10 @@ function withUSCensus(cells, row, address) {
     [lngColumn, z.coordinates.x],
     [qualityColumn, quality],
     [sourceColumn, 'US Census'],
-    [stateColumn, z.state],
-    [countyColumn, ],
-    [blockColumn, ],
-    [tractColumn, ]
+    [stateColumn, z.geographies['2010 Census Blocks'][0].STATE],
+    [countyColumn, z.geographies['Counties'][0].GEOID],
+    [blockColumn, z.geographies['2010 Census Blocks'][0].BLOCK],
+    [tractColumn, z.geographies['Census Tracts'][0].TRACT]
   ]);
 
   return 0;
