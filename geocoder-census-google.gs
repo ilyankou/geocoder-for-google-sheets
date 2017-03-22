@@ -37,12 +37,7 @@ function geocode(source) {
     if (source == 'US Census') {
       nFailure += withUSCensus(cells, addressRow, address);
     } else {
-      code = withGoogle(cells, addressRow, address);
-      if (code == 2) {
-        printComplete = false;
-        break;
-      }
-      nFailure += code;
+      nFailure += withGoogle(cells, addressRow, address);
     }
   }
 
@@ -155,25 +150,9 @@ function googleAddressToPosition() {
   geocode('Google');
 }
 
-function generateMenu() {
-  var entries = [
-    {
-      name: "with US Census (limit 1000 per batch)",
-      functionName: 'censusAddressToPosition'
-    },
-    {
-      name: "with Google (limit 1000 per day)" ,
-      functionName: "googleAddressToPosition"
-    },
-  ];
-
-  return entries;
-}
-
-function updateMenu() {
-  SpreadsheetApp.getActiveSpreadsheet().updateMenu('Geocoder', generateMenu());
-}
-
 function onOpen() {
-  SpreadsheetApp.getActiveSpreadsheet().addMenu('Geocoder', generateMenu());
+  ui.createMenu('Geocoder')
+   .addItem('with US Census (limit 1000 per batch)', 'censusAddressToPosition')
+   .addItem('with Google (limit 1000 per day)', 'googleAddressToPosition')
+   .addToUi();
 }
