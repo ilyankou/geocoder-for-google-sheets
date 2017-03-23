@@ -6,23 +6,22 @@ var lngColumn = 3;
 var foundAddressColumn = 4;
 var qualityColumn = 5;
 var sourceColumn = 6;
-var stateColumn = 7;
-var countyColumn = 8;
-var tractColumn = 9;
-var blockColumn = 10;
+var benchmarkColumn = 7;
+var geographyColumn = 8;
+var blockGeoIdColumn = 9;
+var tractColumn = 10;
 
-googleGeocoder = Maps.newGeocoder().setRegion(
-  PropertiesService.getDocumentProperties().getProperty('GEOCODING_REGION') || 'us'
-);
+var benchmark = '';
+var vintage = '';
 
-function geocode(source) {
+function geocode() {
   var sheet = SpreadsheetApp.getActiveSheet();
   var cells = sheet.getActiveRange();
 
   if (cells.getNumColumns() != 10) {
     ui.alert(
       'Warning',
-      'You must select 10 columns: Location, Latitude, Longitude, Found, Quality, Source, State, County, Tract, Block',
+      'You must select 10 columns: Location, Latitude, Longitude, Found, Quality, Source, Benchmark, Vintage, BlockGeoId, Tract',
       ui.ButtonSet.OK
     );
     return;
@@ -35,13 +34,9 @@ function geocode(source) {
 
   for (addressRow = 1; addressRow <= cells.getNumRows(); addressRow++) {
     var address = cells.getCell(addressRow, addressColumn).getValue();
-
     if (!address) {continue}
     nAll++;
-
-    if (source == 'US Census') {
-      nFailure += withUSCensus(cells, addressRow, address);
-    }
+    nFailure += withUSCensus(cells, addressRow, address);
   }
 
   if (printComplete) {
@@ -57,13 +52,11 @@ function withUSCensus(cells, row, address) {
   var url = 'https://geocoding.geo.census.gov/'
           + 'geocoder/geographies/onelineaddress?address='
           + encodeURIComponent(address)
-          + '&vintage=Current_Current'
-          + '&benchmark=Public_AR_Current&format=json';
+          + '&vintage=' + vintage
+          + '&benchmark=' + benchmark
+          + '&format=json';
 
   var response = JSON.parse(UrlFetchApp.fetch(url));
-
-  Logger.log(response);
-
   var matches = (response.result.addressMatches.length > 0) ? 'Match' : 'No Match';
 
   if (matches !== 'Match') {
@@ -73,15 +66,18 @@ function withUSCensus(cells, row, address) {
       [lngColumn, ''],
       [qualityColumn, 'No Match'],
       [sourceColumn, 'US Census'],
-      [stateColumn, ''],
-      [countyColumn, ''],
+      [benchmarkColumn, ''],
+      [geographyColumn, ''],
       [tractColumn, ''],
-      [blockColumn, '']
+      [blockGeoIdColumn, '']
     ]);
     return 1;
   }
 
+
+
   var z = response.result.addressMatches[0];
+  Logger.log(z);
 
   var quality;
   if (address.toLowerCase().replace(/[,\']/g, '') ==
@@ -97,10 +93,10 @@ function withUSCensus(cells, row, address) {
     [lngColumn, z.coordinates.x],
     [qualityColumn, quality],
     [sourceColumn, 'US Census'],
-    [stateColumn, z.geographies['2010 Census Blocks'][0].STATE],
-    [countyColumn, z.geographies['Counties'][0].GEOID],
-    [blockColumn, z.geographies['2010 Census Blocks'][0].BLOCK],
-    [tractColumn, z.geographies['Census Tracts'][0].TRACT]
+    [benchmarkColumn, benchmark],
+    [geographyColumn, vintage],
+    [blockGeoIdColumn, z.geographies['Census Tracts'][0].GEOID],
+    [tractColumn, z.geographies['Census Tracts'][0].BASENAME]
   ]);
 
   return 0;
@@ -116,12 +112,41 @@ function insertDataIntoSheet(cells, row, data) {
   }
 }
 
-function censusAddressToPosition() {
-  geocode('US Census');
-}
+function cur_cur_cur()          {benchmark = 'Public_AR_Current'; vintage = 'Current_Current'; geocode();} // 2010 Census Blocks
+function cur_2010_cur()         {benchmark = 'Public_AR_Current'; vintage = 'Census2010_Current'; geocode();} // Census Blocks
+function cur_2013_cur()         {benchmark = 'Public_AR_Current'; vintage = 'ACS2013_Current'; geocode();}
+function cur_2014_cur()         {benchmark = 'Public_AR_Current'; vintage = 'ACS2014_Current'; geocode();}
+function cur_2015_cur()         {benchmark = 'Public_AR_Current'; vintage = 'ACS2015_Current'; geocode();}
+function cur_2016_cur()         {benchmark = 'Public_AR_Current'; vintage = 'ACS2016_Current'; geocode();}
+
+function acs2016_cur_2016()     {benchmark = 'Public_AR_ACS2016'; vintage = 'Current_ACS2016'; geocode();}
+function acs2016_2010_2016()    {benchmark = 'Public_AR_ACS2016'; vintage = 'ACS2010_ACS2016'; geocode();}
+function acs2016_2013_2016()    {benchmark = 'Public_AR_ACS2016'; vintage = 'ACS2013_ACS2016'; geocode();}
+function acs2016_2014_2016()    {benchmark = 'Public_AR_ACS2016'; vintage = 'ACS2014_ACS2016'; geocode();}
+function acs2016_2015_2016()    {benchmark = 'Public_AR_ACS2016'; vintage = 'ACS2015_ACS2016'; geocode();}
+function acs2016_2016_2016()    {benchmark = 'Public_AR_ACS2016'; vintage = 'ACS2016_ACS2016'; geocode();}
+
+function census2010_2010_2010() {benchmark = 'Public_AR_Census2010'; vintage = 'Census2010_Census2010'; geocode();}
+function census2010_2000_2010() {benchmark = 'Public_AR_Census2010'; vintage = 'Census2000_Census2010'; geocode();}
 
 function onOpen() {
-  ui.createMenu('Geocoder')
-   .addItem('with US Census (limit 1000 per batch)', 'censusAddressToPosition')
+  ui.createMenu('US Census')
+   .addSubMenu(ui.createMenu('Public AR Current')
+     .addItem('Current_Current', 'cur_cur_cur')
+     .addItem('Census2010_Current', 'cur_2010_cur')
+     .addItem('ACS2013_Current', 'cur_2013_cur')
+     .addItem('ACS2014_Current', 'cur_2014_cur')
+     .addItem('ACS2015_Current', 'cur_2015_cur')
+     .addItem('ACS2016_Current', 'cur_2016_cur'))
+   .addSubMenu(ui.createMenu('Public AR ACS2016')
+     .addItem('Current_ACS2016', 'acs2016_cur_2016')
+     .addItem('Census2010_ACS2016', 'acs2016_2010_2016')
+     .addItem('ACS2013_ACS2016', 'acs2016_2013_2016')
+     .addItem('ACS2014_ACS2016', 'acs2016_2014_2016')
+     .addItem('ACS2015_ACS2016', 'acs2016_2015_2016')
+     .addItem('ACS2016_ACS2016', 'acs2016_2016_2016'))
+   .addSubMenu(ui.createMenu('Public AR Census 2010')
+     .addItem('Census2010_Census2010', 'census2010_2010_2010')
+     .addItem('Census2000_Census2010', 'census2010_2000_2010'))
    .addToUi();
 }
