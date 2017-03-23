@@ -8,7 +8,7 @@ var qualityColumn = 5;
 var sourceColumn = 6;
 var benchmarkColumn = 7;
 var geographyColumn = 8;
-var blockGeoIdColumn = 9;
+var GeoIdColumn = 9;
 var tractColumn = 10;
 
 var benchmark = '';
@@ -21,7 +21,7 @@ function geocode() {
   if (cells.getNumColumns() != 10) {
     ui.alert(
       'Warning',
-      'You must select 10 columns: Location, Latitude, Longitude, Found, Quality, Source, Benchmark, Vintage, BlockGeoId, Tract',
+      'You must select 10 columns: Location, Latitude, Longitude, Found, Quality, Source, Benchmark, Vintage, GeoID, Tract',
       ui.ButtonSet.OK
     );
     return;
@@ -55,7 +55,7 @@ function withUSCensus(cells, row, address) {
           + '&vintage=' + vintage
           + '&benchmark=' + benchmark
           + '&format=json';
-
+  
   var response = JSON.parse(UrlFetchApp.fetch(url));
   var matches = (response.result.addressMatches.length > 0) ? 'Match' : 'No Match';
 
@@ -69,13 +69,13 @@ function withUSCensus(cells, row, address) {
       [benchmarkColumn, ''],
       [geographyColumn, ''],
       [tractColumn, ''],
-      [blockGeoIdColumn, '']
+      [GeoIdColumn, '']
     ]);
     return 1;
   }
 
 
-
+  
   var z = response.result.addressMatches[0];
   Logger.log(z);
 
@@ -86,7 +86,7 @@ function withUSCensus(cells, row, address) {
   } else {
     quality = 'Match';
   }
-
+  
   insertDataIntoSheet(cells, row, [
     [foundAddressColumn, z.matchedAddress],
     [latColumn, z.coordinates.y],
@@ -95,7 +95,7 @@ function withUSCensus(cells, row, address) {
     [sourceColumn, 'US Census'],
     [benchmarkColumn, benchmark],
     [geographyColumn, vintage],
-    [blockGeoIdColumn, z.geographies['Census Tracts'][0].GEOID],
+    [GeoIdColumn, z.geographies['Census Tracts'][0].GEOID],
     [tractColumn, z.geographies['Census Tracts'][0].BASENAME]
   ]);
 
@@ -130,7 +130,7 @@ function census2010_2010_2010() {benchmark = 'Public_AR_Census2010'; vintage = '
 function census2010_2000_2010() {benchmark = 'Public_AR_Census2010'; vintage = 'Census2000_Census2010'; geocode();}
 
 function onOpen() {
-  ui.createMenu('US Census')
+  ui.createMenu('US Census Geocoder (1000 per batch)')
    .addSubMenu(ui.createMenu('Public AR Current')
      .addItem('Current_Current', 'cur_cur_cur')
      .addItem('Census2010_Current', 'cur_2010_cur')
