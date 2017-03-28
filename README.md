@@ -40,6 +40,7 @@ https://docs.google.com/spreadsheets/d/1x_E9KwZ88c_kZvhZ13IF7BNwYKTJFxbfDu77sU1v
   - Find Locations using > Address Batch (returns latitude, longitude coordinates)
   - Find Geographies using > Address Batch (returns lat, lng, census geographies)
 - Upload CSV table with up to 1000 rows for faster processing, in this format:
+
 | AnyID  | Street | City | State | Zip   |
 | :----- | :----- | :--- | :---- | : --- |
 | 1      | 300 Summit St  | Hartford | CT | 06106 |
