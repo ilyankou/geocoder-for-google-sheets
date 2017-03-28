@@ -34,12 +34,25 @@ https://docs.google.com/spreadsheets/d/1x_E9KwZ88c_kZvhZ13IF7BNwYKTJFxbfDu77sU1v
   - Save as Code.gs (or save, then rename to geocoder-census-google.gs)
   - Refresh your Google Sheet and look for new Geocoder menu
 
+## See also: Batch upload to US Census
+- Available at US Census Geocoder https://geocoding.geo.census.gov/geocoder/
+- Upload up to 1000 rows
+  - Find Locations using > Address Batch (returns latitude, longitude coordinates)
+  - Find Geographies using > Address Batch (returns lat, lng, census geographies)
+- Upload CSV table with up to 1000 rows for faster processing, in this format:
+| AnyID  | Street | City | State | Zip   |
+| :----- | :----- | :--- | :---- | : --- |
+| 1      | 300 Summit St  | Hartford | CT | 06106 |
+
 ## Credits
 - Developed by [Ilya Ilyankou](https://github.com/ilyankou) and [Jack Dougherty](https://github.com/jackdougherty) with support from Trinity College CT, for [Data Visualization For All](https://www.datavizforall.org/)
 - Inspired by Google Sheets Geocoding Macro (2016) https://github.com/nuket/google-sheets-geocoding-macro (no license)
 - Geocoding services:
   - US Census Geocoder https://geocoding.geo.census.gov/geocoder/
   - Geocode with Google Apps: The Maps Service of Google Apps allows users to geocode street addresses without using the Google Maps API, limit 1,000 searches daily per user, https://developers.google.com/apps-script/reference/maps/geocoder
+
+## Learn more
+- Data Visualization for All, http://DataVizForAll.org
 
 ### Testing
 - Geocoder-with-Mapzen.gs -- need to focus search within a country or prioritize area https://mapzen.com/documentation/search/search/#search-within-a-particular-country
