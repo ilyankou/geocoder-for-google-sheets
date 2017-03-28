@@ -66,7 +66,7 @@ function withUSCensus(cells, row, address) {
       [latColumn, ''],
       [lngColumn, ''],
       [qualityColumn, 'No Match'],
-      [sourceColumn, 'US Census']
+      [sourceColumn, '']
     ]);
     return 1;
   }
@@ -86,7 +86,7 @@ function withUSCensus(cells, row, address) {
     [latColumn, z.coordinates.y],
     [lngColumn, z.coordinates.x],
     [qualityColumn, quality],
-    [sourceColumn, 'US Census'],
+    [sourceColumn, 'US Census 2010'],
     [geoIdColumn, z.geographies['2010 Census Blocks'][0].GEOID],
     [tractColumn, z.geographies['Census Tracts'][0].BASENAME]
   ]);
@@ -106,6 +106,6 @@ function insertDataIntoSheet(cells, row, data) {
 
 function onOpen() {
   ui.createMenu('Geocoder')
-   .addItem('US Census', 'geocode')
+   .addItem('US Census 2010 Geographies', 'geocode')
    .addToUi();
 }
