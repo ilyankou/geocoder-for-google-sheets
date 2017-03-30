@@ -13,7 +13,7 @@ Geocode addresses into latitude/longitude coordinates inside Google Sheets, with
 - Geocode US addresses into latitude, longitude, GeoID census tract, inside a Google Sheet
 - Go to Google Sheet template, sign in to your account, and File > Make a Copy to your Google Drive
 https://docs.google.com/spreadsheets/d/1x_E9KwZ88c_kZvhZ13IF7BNwYKTJFxbfDu77sU1vn5w/edit#gid=0
-- Insert locations, select 10 columns, and select Geocoder menu: US Census 2010 Geographies
+- Insert locations, select 8 columns, and select Geocoder menu: US Census 2010 Geographies
 - Google Sheets script will ask for permission to run the first time
 
 ![Screencast](google-sheets-geocoder-census-geographies.gif)
@@ -28,6 +28,7 @@ https://docs.google.com/spreadsheets/d/1x_E9KwZ88c_kZvhZ13IF7BNwYKTJFxbfDu77sU1v
   - block = 001
 
 ## How to insert script into any Google Sheet
+  - Download or fork the Google Sheets scripts (.gs) from this GitHub repo
   - Go to your Google Sheets > Tools > Script Editor
   - File > Create New Script File
   - Copy and paste contents of your preferred script (such as geocoder-census-google.gs)
@@ -45,6 +46,9 @@ https://docs.google.com/spreadsheets/d/1x_E9KwZ88c_kZvhZ13IF7BNwYKTJFxbfDu77sU1v
 | :----- | :----- | :--- | :---- | : --- |
 | 1      | 300 Summit St  | Hartford | CT | 06106 |
 
+## Learn more
+- Data Visualization for All book, see Transform Your Data chapter, http://DataVizForAll.org
+
 ## Credits
 - Developed by [Ilya Ilyankou](https://github.com/ilyankou) and [Jack Dougherty](https://github.com/jackdougherty) with support from Trinity College CT, for [Data Visualization For All](https://www.datavizforall.org/)
 - Inspired by Google Sheets Geocoding Macro (2016) https://github.com/nuket/google-sheets-geocoding-macro (no license)
@@ -52,8 +56,7 @@ https://docs.google.com/spreadsheets/d/1x_E9KwZ88c_kZvhZ13IF7BNwYKTJFxbfDu77sU1v
   - US Census Geocoder https://geocoding.geo.census.gov/geocoder/
   - Geocode with Google Apps: The Maps Service of Google Apps allows users to geocode street addresses without using the Google Maps API, limit 1,000 searches daily per user, https://developers.google.com/apps-script/reference/maps/geocoder
 
-## Learn more
-- Data Visualization for All, http://DataVizForAll.org
+
 
 ### Testing
 - Geocoder-with-Mapzen.gs -- need to focus search within a country or prioritize area https://mapzen.com/documentation/search/search/#search-within-a-particular-country
