@@ -152,7 +152,7 @@ function googleAddressToPosition() {
 
 function onOpen() {
   ui.createMenu('Geocoder')
-   .addItem('with US Census (limit 1000 per batch)', 'censusAddressToPosition')
+   .addItem('with US Census', 'censusAddressToPosition')
    .addItem('with Google (limit 1000 per day)', 'googleAddressToPosition')
    .addToUi();
 }
