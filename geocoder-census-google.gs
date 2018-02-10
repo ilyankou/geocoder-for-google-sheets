@@ -150,9 +150,13 @@ function googleAddressToPosition() {
   geocode('Google');
 }
 
-function onOpen() {
+function onOpen(e) {
   ui.createMenu('Geocoder')
    .addItem('with US Census', 'censusAddressToPosition')
    .addItem('with Google (limit 1000 per day)', 'googleAddressToPosition')
    .addToUi();
+}
+
+function onInstall(e) {
+  onOpen(e);
 }
